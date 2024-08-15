@@ -2,37 +2,94 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "accountname": {
-            "minlength": 3,
-            "maxlength": 24,
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string"
+        },
+        "skuCode": {
+            "type": "string"    
+        },
+        "applocation": {
+            "type": "string"
+        },
+        "apilocation":{
+            "type": "string"
+        },
+        "appArtifactLocation":{
+            "type": "string"
+        },
+        "resourceTags":{
+            "type": "object"
+        },
+        "appsetting":{
+            "type": "object"
+        },
+        "storageNamePrefix":{
             "type": "string",
-            "metadata":{
-                "description": "Storage Account Name"
-            }
-        }
+            "defaultValue": "Sam"
+        }      
     },
-    "functions": [],
-    "variables": {},
     "resources": [
         {
-      "name":"[parameters('accountname')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2021-08-01",
-      "tags": {
-        "displayName": "storan1279"
-      },
-      "location": "[resourceGroup().location]",
-      "kind": "StorageV2",
-      "sku": {
-        "name": "Standard_LRS",
-        "tier": "Standard"
-      }
+            "apiVersion": "2021-01-15",
+            "name": "[parameters('name')]",
+            "type": "Microsoft.Web/staticSites",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('resourceTags')]",
+            "properties": {
+                "buildProperties": {
+                    "appLocation": "[parameters('applocation')]",
+                    "appArtifactLocation": "[parameters('appArtifactLocation')]",
+                    "apiLocation": "[parameters('apilocation')]"
+                }
+            
+        },
+        "sku" : {
+            "Tier": "[parameters('sku')]",
+            "Name": "[parameters('skuCode')]"
+        },
+        "resources": [
+            {
+                "apiVersion": "2021-01-15",
+                "name": "appsettings",
+                "type": "config",
+                "location": "[parameters('location')]",
+                "properties": "[parameters('appsetting')]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/staticSites', parameters('name'))]"
+                ]
+            }
+        ]
+    },
+    {
+        "name":"[variables('storageName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2021-08-01",
+        "tags": {
+            "displayName": "[variables('storageName')]"
+        },
+        "location": "[resourceGroup().location]",
+        "kind":"StorageV2",
+        "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+            }
     }
-    ],
+],
+    "variables": {
+        "resourceId": "[resourceId('Microsoft.Web/staticSites/', parameters('name'))]",
+        "storageName": "[toLower( concat(parameters('storageNamePrefix'), uniqueString(resourceGroup().id)))]"
+    },
+    
     "outputs": {
-      "stortageaccountprimarykey": {
-        "type": "string",
-        "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',parameters('accountname')),'2018-07-01').keys[0].value]"
+        "deploymentToken": {
+            "type": "string",
+            "value": "[listSecrets(variables('resourceId'), '2019-08-01').properties.apikey]"
+        }
     }
-}
 }
