@@ -1,0 +1,6 @@
+pub_36512caa710fbd4276987159f80fea0166489
+
+https://newsdata.io/api/1/news?apikey=pub_36512caa710fbd4276987159f80fea0166489q=
+
+const url = "https://newsdata.io/api/1/news?apikey=pub_2501573d5a66fa29132ca8fa301fb38bbf7cc&q=";
+const url = "https://newsdata.io/api/1/news?apikey=pub_36512caa710fbd4276987159f80fea0166489&q=";
